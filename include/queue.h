@@ -1,6 +1,7 @@
 #ifndef __QUEUE_H
 #define __QUEUE_H
 
+#include <stdbool.h>
 #include "procinfo.h"
 
 struct qnode {
@@ -14,8 +15,8 @@ typedef struct {
 
 void init_queue(queue_t *q);
 
-void qisempty(queue_t *q);
-void qpush(queue_t *q, proc_info_t *proc);
+bool qisempty(queue_t *q);
+bool qpush(queue_t *q, proc_info_t *proc);
 proc_info_t* qpop(queue_t *q);
 
 #endif /* __QUEUE_H */
