@@ -23,6 +23,8 @@ proc_info_t *create_proc(init_fn_t init_fn, void *arg,
 
 /* Destroys a process and its stack */
 void destroy_proc(proc_info_t *proc);
-void invoke_proc(proc_info_t *proc);
+
+/* Invokes the process and saves the current context */
+void invoke_proc(proc_info_t *proc, ucontext_t *out_context);
 
 #endif /* __PROCINFO_H */
