@@ -30,7 +30,7 @@ proc_info_t *create_proc(init_fn_t init_fn, void *arg,
 	proc->ctx.uc_link = uc_link;
 
 	/* Initialize the context with its function */
-	makecontext(&proc->ctx, (ucontext_fn_t)init_fn, (int)arg);
+	makecontext(&proc->ctx, (ucontext_fn_t)init_fn, 1, arg);
 	
 	return proc;
 }
