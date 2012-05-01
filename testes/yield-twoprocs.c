@@ -2,7 +2,8 @@
  *
  * The program receives a number from standard input, or uses 10
  * as the default, and is supposed to print all numbers from 1 to
- * the given one.
+ * the given one.  One thread prints the odd numbers, another the
+ * even, and the order must be correct.
  *
  * If the test fails, exits with 1;
  */
@@ -40,7 +41,7 @@ int main(int argc, char **argv)
 			   "Give me a number greater than 1 or\n"
 			   "i'll go into an infinite loop.\n"
 			   "\n"
-			   "I'm using %d instead of %d.",
+			   "I'm using %d instead of %d.\n",
 			   DEFAULT_MAX, max);
 		max = DEFAULT_MAX;
 	}
