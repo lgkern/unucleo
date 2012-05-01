@@ -1,6 +1,11 @@
 #ifndef __UNUCLEO_H
 #define __UNUCLEO_H
 
+#define TOTAL_PRIORITIES 3
+#define HIGH 0
+#define MEDIUM 1
+#define LOW 2
+
 /* Initializes the ukernel.
  * Returns 0 on success. */
 int libsisop_init();

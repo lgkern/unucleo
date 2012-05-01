@@ -4,7 +4,7 @@ CC=gcc
 CFLAGS=-Wall -g -Iinclude -std=gnu99
 
 # Objects for the library itself
-OBJNAMES=procinfo queue
+OBJNAMES=procinfo queue unucleo
 OBJS=$(OBJNAMES:%=bin/%.o)
 
 
@@ -32,6 +32,6 @@ help:
 bin/%.o: src/%.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-bin/procinfo.o bin/queue.o: include/procinfo.h
-bin/procinfo.o bin/queue.o: include/queue.h
-
+bin/procinfo.o bin/queue.o bin/unucleo.o: include/procinfo.h
+bin/procinfo.o bin/queue.o bin/unucleo.o: include/queue.h
+bin/unucleo.o: include/unucleo.h
