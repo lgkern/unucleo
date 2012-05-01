@@ -1,14 +1,36 @@
 #include <stdlib.h>
-#include "unucleo.h"
-#include "queue.h"
+#include <ucontext.h>
+
 #include "procinfo.h"
+#include "queue.h"
+#include "unucleo.h"
 
 
-//Default process queues
+/*** Internal API ***/
+
+/* Handler for the end of process:
+ *  unblocks waiting processes,
+ *  delegates to the scheduler.
+ */
+void return_handler();
+
+/* Selects a process from the ready
+ * queues and jumps to its context */
+void dispatch();
+
+
+
+
+// Default process queues
 queue_t process_priority[TOTAL_PRIORITIES];
 
-//Structure of the current running process
-proc_info_t running_process;
+// Structure of the current running process
+proc_info_t *running_process;
+
+// Context to which all processes return
+ucontext_t proc_end_ctx;
+
+
 
 /* Initializes the ukernel.
  * Returns 0 on success. */
@@ -18,11 +40,20 @@ int libsisop_init()
 	init_queue(&process_priority[LOW]);
 	init_queue(&process_priority[MEDIUM]);
 	init_queue(&process_priority[HIGH]);
-	
+
 	//Initializes the current process structure
-	running_process.pid = -1;
-	init_queue(&running_process.blocked);
-	
+	running_process=NULL;
+
+	//Initializes the context for the end of each process
+	getcontext(&proc_end_ctx);
+
+	void *stack = malloc(STACK_SIZE);
+	if (stack==NULL) return 1;
+	proc_end_ctx.uc_stack.ss_sp = stack;
+	proc_end_ctx.uc_stack.ss_size = STACK_SIZE;
+
+	makecontext(&proc_end_ctx, return_handler, 0);
+
 	return 0;
 }
 
