@@ -19,9 +19,8 @@ struct {
 
 
 /*** API Functions ***/
-proc_info_t *create_proc(init_fn_t init_fn, void *arg,
-						 ucontext_t *uc_link,
-						 int block_idx)
+proc_info_t *create_proc(int prio, init_fn_t init_fn, void *arg,
+						 ucontext_t *uc_link)
 {
 	/* Allocate a PID and proc_info */
 	proc_info_t *proc = alloc_proc();
@@ -34,8 +33,9 @@ proc_info_t *create_proc(init_fn_t init_fn, void *arg,
 		return NULL;
 	}
 
-	/* Initialize blocked list */
+	/* Initialize blocked list and priority */
 	init_queue(&proc->blocked);
+	proc->priority = prio;
 
 	/* Initialize the context with stack and uc_link */
 	getcontext(&proc->ctx);
