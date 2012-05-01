@@ -57,14 +57,45 @@ int libsisop_init()
 	return 0;
 }
 
+
 /* Creates a new process with given priority,
  * which will execute start_routine with arg
  * until it returns.
- * Returns 0 on success. */
+ * Returns the PID of the created process or -1 */
 int mproc_create(int prio, void *(*start_routine)(void*), void *arg)
 {
-	return 0;
+	/* Verifies the priority */
+	if (prio != MEDIUM && prio != LOW) {
+		return -1;
+	}
+
+	/* Creates the process itself */
+	proc_info_t *proc = create_proc(prio, start_routine, arg, &proc_end_ctx);
+	if (proc == NULL) {
+		return -1;
+	}
+
+	/* Adds the process to its ready queue */
+	if (!qpush(&process_priority[proc->priority], proc)) {
+		destroy_proc(proc);
+		return -1;
+	}
+
+	return proc->pid;
 }
+
+void return_handler()
+{
+	/* Unblocks waiting processes */
+	while (!qisempty(&running_process->blocked)) {
+		proc_info_t *unblocked = qpop(&running_process->blocked);
+		qpush(&process_priority[unblocked->priority], unblocked);
+	}
+
+	destroy_proc(running_process);
+	dispatch();
+}
+
 
 /* Pauses execution, allowing other processes to execute. */
 void mproc_yield(void)
