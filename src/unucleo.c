@@ -30,6 +30,9 @@ proc_info_t *running_process;
 // Context to which all processes return
 ucontext_t proc_end_ctx;
 
+// Scheduler context
+ucontext_t sched_ctx;
+
 
 
 /* Initializes the ukernel.
@@ -53,6 +56,18 @@ int libsisop_init()
 	proc_end_ctx.uc_stack.ss_size = STACK_SIZE;
 
 	makecontext(&proc_end_ctx, return_handler, 0);
+	
+	stack = NULL;
+	
+	//Initializes the context of the Scheduler function
+	getcontext(&sched_ctx);
+
+	stack = malloc(STACK_SIZE);
+	if (stack==NULL) return 2;
+	sched_ctx.uc_stack.ss_sp = stack;
+	sched_ctx.uc_stack.ss_size = STACK_SIZE;
+	
+	makecontext(&sched_ctx, scheduler, 0);
 
 	return 0;
 }
@@ -100,7 +115,8 @@ void return_handler()
 /* Pauses execution, allowing other processes to execute. */
 void mproc_yield(void)
 {
-
+	qpush(&process_priority[running_process->priority],running_process);
+	swapcontext(&running_process->ctx,&sched_ctx);
 }
 
 /* Stops execution until the given process ends.
@@ -108,6 +124,9 @@ void mproc_yield(void)
  * execution after end of other process). */
 int mproc_join(int pid)
 {
+	proc_info_t* blocker = get_proc(pid);	
+	qpush(&blocker->blocked,running_process);
+	swapcontext(&running_process->ctx,&sched_ctx)
 	return 0;
 }
 
@@ -117,5 +136,31 @@ int mproc_join(int pid)
  */
 void scheduler()
 {
+	get_context(&sched_ctx);
+	dispatcher();
+	
+	return;
+}
 
+void dispatcher()
+{
+	
+//Select the next process based on priority
+	if(!qisempty(&process_priority[HIGH]))
+	{
+		running_process = qpop(&process_priority[HIGH]);
+		set_context(&running_process->ctx);
+	}
+	else if(!qisempty(&process_priority[MEDIUM]))
+	{
+		running_process = qpop(&process_priority[MEDIUM]);
+		set_context(&running_process->ctx);
+	}
+	else if(!qisempty(&process_priority[LOW]))
+	{
+		running_process = qpop(&process_priority[LOW]);
+		set_context(&running_process->ctx);
+	}
+//No more processes to be scheduled into the processor
+	return;	
 }
