@@ -14,19 +14,21 @@
 #include <stdio.h>
 #include "unucleo.h"
 
-#define DEFAULT_MAX = 10;
+#define DEFAULT_MAX 10
 int max;
 int obtained;
 
-void count(void *first) {
+void *count(void *first) {
 	obtained = (int)first;
-	white (obtained <= max) {
+	while (obtained <= max) {
 		printf("%d ", obtained++);
 		mproc_yield();
 	}
+
+	return NULL;
 }
 
-void end(void *expected) {
+void *end(void *expected) {
 	puts("");
 
 	if ((int)expected == obtained) {
@@ -37,11 +39,13 @@ void end(void *expected) {
 			   (int)expected, obtained);
 		exit(1);
 	}
+
+	return NULL;
 }
 
 int main(int argc, char **argv)
 {
-	/* Obtains the maximum number for command line options */
+	/* Obtains the maximum number from command line options */
 	if (argc < 2 || sscanf(argv[1], "%d", &max) < 1) {
 		max = DEFAULT_MAX;
 	}

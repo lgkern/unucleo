@@ -7,18 +7,19 @@
  *
  * If the test fails, exits with 1;
  */
+#include <stdbool.h>
 #include <stdio.h>
-#include <stlib.h>
+#include <stdlib.h>
 #include "unucleo.h"
 
-#define DEFAULT_MAX = 10;
+#define DEFAULT_MAX 10
 int max;
 
 int current;
 int *expected;
 int *obtained;
 
-void printnums(void *first)
+void *printnums(void *first)
 {
 	int i = (int)first;
 	while (i<=max) {
@@ -26,6 +27,8 @@ void printnums(void *first)
 		obtained[current++] = i;
 		mproc_yield();
 	}
+
+	return NULL;
 }
 
 int main(int argc, char **argv)

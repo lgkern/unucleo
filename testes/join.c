@@ -10,34 +10,39 @@
  *
  * If the test fails, exits with 1;
  */
+#include <stdlib.h>
 #include <stdio.h>
 #include "unucleo.h"
 
-#define DEFAULT_MAX = 10;
+#define DEFAULT_MAX 10
 int max;
 int obtained;
-pid_t count_thread;
+int count_thread;
 
-void count(void *first) {
+void *count(void *first) {
 	obtained = (int)first;
-	white (obtained <= max) {
+	while (obtained <= max) {
 		printf("%d ", obtained++);
 		mproc_yield();
 	}
+
+	return NULL;
 }
 
-void end(void *expected) {
+void *end(void *expected) {
 	mproc_join(count_thread);
 	puts("");
 
 	if ((int)expected == obtained) {
 		puts("Everything went as expected!");
-		result = 0;
+		exit(0);
 	} else {
 		printf("Error: expected to end on %d, but got %d\n",
 			   (int)expected, obtained);
-		result = 1;
+		exit(1);
 	}
+
+	return NULL;
 }
 
 int main(int argc, char **argv)
