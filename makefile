@@ -2,6 +2,9 @@
 # Compilation/linking parameters and programs
 CC=gcc
 CFLAGS=-Wall -g -Iinclude -std=gnu99
+AR=ar
+ARFLAGS=rcs
+
 
 # Objects for the library itself
 OBJNAMES=procinfo queue unucleo
@@ -12,7 +15,7 @@ OBJS=$(OBJNAMES:%=bin/%.o)
 #### MAIN TARGETS
 all: library
 
-library: bin $(OBJS)
+library: bin lib lib/libsisop.a
 
 clean:
 	rm -f bin/*
@@ -28,7 +31,21 @@ help:
 
 .PHONY: library clean help
 
+
+
+#### DIRECTORIES
+bin:
+	mkdir bin
+
+lib:
+	mkdir lib
+
+
+
 #### LIBRARY BINARIES
+lib/libsisop.a: $(OBJS)
+	$(AR) $(ARFLAGS) $@ $^
+
 bin/%.o: src/%.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
