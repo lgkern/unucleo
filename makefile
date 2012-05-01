@@ -2,9 +2,12 @@
 # Compilation/linking parameters and programs
 CC=gcc
 CFLAGS=-Wall -g -Iinclude -std=gnu99
+AR=ar
+ARFLAGS=rcs
+
 
 # Objects for the library itself
-OBJNAMES=procinfo queue
+OBJNAMES=procinfo queue unucleo
 OBJS=$(OBJNAMES:%=bin/%.o)
 
 # Tests
@@ -19,7 +22,7 @@ vpath %.o bin
 #### MAIN TARGETS
 all: library
 
-library: bin $(OBJS)
+library: bin lib lib/libsisop.a
 
 tests: bin library $(TESTS)
 	@echo
@@ -44,21 +47,27 @@ help:
 .PHONY: library tests run_tests clean help
 .SUFFIXES = .c .h .o .a .test
 
+
+
 #### DIRECTORIES
 bin:
 	mkdir bin
 
-bin/tests:
-	mkdir -p bin/tests
+lib:
+	mkdir lib
 
 
 
 #### LIBRARY BINARIES
+lib/libsisop.a: $(OBJS)
+	$(AR) $(ARFLAGS) $@ $^
+
 bin/%.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-bin/procinfo.o bin/queue.o: procinfo.h
-bin/procinfo.o bin/queue.o: queue.h
+bin/procinfo.o bin/queue.o bin/unucleo.o: include/procinfo.h
+bin/procinfo.o bin/queue.o bin/unucleo.o: include/queue.h
+bin/unucleo.o: include/unucleo.h
 
 
 

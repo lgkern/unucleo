@@ -1,6 +1,11 @@
 #ifndef __UNUCLEO_H
 #define __UNUCLEO_H
 
+#define TOTAL_PRIORITIES 3
+#define HIGH 0
+#define MEDIUM 1
+#define LOW 2
+
 /* Initializes the ukernel.
  * Returns 0 on success. */
 int libsisop_init();
@@ -8,7 +13,7 @@ int libsisop_init();
 /* Creates a new process with given priority,
  * which will execute start_routine with arg
  * until it returns.
- * Returns 0 on success. */
+ * Returns the PID of the created process or -1 */
 int mproc_create(int prio, void *(*start_routine)(void*), void *arg);
 
 /* Pauses execution, allowing other processes to execute. */
