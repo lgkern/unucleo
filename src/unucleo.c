@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <ucontext.h>
 
 #include "procinfo.h"
@@ -104,10 +105,16 @@ void return_handler()
 
 
 /* Pauses execution, allowing other processes to execute. */
-void mproc_yield(void)
+int mproc_yield(void)
 {
-	qpush(&process_priority[running_process->priority],running_process);
+	/* Puts the current process back into the ready queues */
+	if ( !qpush(&process_priority[running_process->priority], running_process) ) {
+		return 1;
+	}
+
+	/* Switches to the scheduler */
 	swapcontext(&running_process->ctx, &sched_ctx);
+	return 0;
 }
 
 /* Stops execution until the given process ends.
@@ -115,9 +122,14 @@ void mproc_yield(void)
  * execution after end of other process). */
 int mproc_join(int pid)
 {
+	/* Puts the process into the blocked queue */
 	proc_info_t* blocker = get_proc(pid);
-	qpush(&blocker->blocked,running_process);
-	swapcontext(&running_process->ctx,&sched_ctx);
+	if (!qpush(&blocker->blocked,running_process)) {
+		return 1;
+	}
+
+	/* Switches to the scheduler */
+	swapcontext(&running_process->ctx, &sched_ctx);
 	return 0;
 }
 

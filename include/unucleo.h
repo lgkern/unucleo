@@ -17,7 +17,7 @@ int libsisop_init();
 int mproc_create(int prio, void *(*start_routine)(void*), void *arg);
 
 /* Pauses execution, allowing other processes to execute. */
-void mproc_yield(void);
+int mproc_yield(void);
 
 /* Stops execution until the given process ends.
  * Returns 0 if successful (i.e. returned to
