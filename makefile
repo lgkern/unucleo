@@ -4,6 +4,8 @@ CC=gcc
 CFLAGS=-Wall -g -Iinclude -std=gnu99
 AR=ar
 ARFLAGS=rcs
+LD=gcc
+LDFLAGS=-Llib
 
 
 # Objects for the library itself
@@ -18,6 +20,7 @@ TESTOBJS=$(TESTNAMES:%=bin/test-%.o)
 vpath %.c src testes
 vpath %.h include
 vpath %.o bin
+vpath %.a lib
 
 #### MAIN TARGETS
 all: library
@@ -25,8 +28,6 @@ all: library
 library: bin lib lib/libsisop.a
 
 tests: bin library $(TESTS)
-	@echo
-	@echo "Linking tests is currently not supported..."
 
 clean:
 	rm -f $(OBJS)
@@ -45,7 +46,6 @@ help:
 	@echo
 
 .PHONY: library tests run_tests clean help
-.SUFFIXES = .c .h .o .a .test
 
 
 
@@ -72,19 +72,24 @@ bin/unucleo.o: include/unucleo.h
 
 
 #### TEST BINARIES
-bin/%.test: test-%.o
-	@echo $@
+bin/%.test: test-%.o libsisop.a
+	$(LD) $(LDFLAGS) -o $@ $< -lsisop
 
 bin/test-%.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-$(TESTOBJS): unucleo.h
+$(TESTOBJS): unucleo.h libsisop.a
 
 
 #### TEST RUNNING
-run_tests:
+run_tests: tests
 	@echo
-	@echo "Running tests is currently not supported..."
+	@for test in $(TESTNAMES);			\
+	do									\
+	    echo "Running test $$test...";	\
+		bin/$$test.test || exit 1;		\
+		echo;							\
+	done
 
 bin/%.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
