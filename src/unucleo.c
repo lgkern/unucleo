@@ -30,8 +30,11 @@ proc_info_t *running_process;
 // Context to which all processes return
 ucontext_t proc_end_ctx;
 
-// Scheduler context
+// Context of the scheduler
 ucontext_t sched_ctx;
+
+// Main context from which the scheduler was first called
+ucontext_t main_ctx;
 
 
 
@@ -56,18 +59,6 @@ int libsisop_init()
 	proc_end_ctx.uc_stack.ss_size = STACK_SIZE;
 
 	makecontext(&proc_end_ctx, return_handler, 0);
-
-	stack = NULL;
-
-	//Initializes the context of the Scheduler function
-	getcontext(&sched_ctx);
-
-	stack = malloc(STACK_SIZE);
-	if (stack==NULL) return 2;
-	sched_ctx.uc_stack.ss_sp = stack;
-	sched_ctx.uc_stack.ss_size = STACK_SIZE;
-
-	makecontext(&sched_ctx, scheduler, 0);
 
 	return 0;
 }
@@ -108,7 +99,7 @@ void return_handler()
 	}
 
 	destroy_proc(running_process);
-	dispatch();
+	setcontext(&sched_ctx);
 }
 
 
@@ -116,7 +107,7 @@ void return_handler()
 void mproc_yield(void)
 {
 	qpush(&process_priority[running_process->priority],running_process);
-	swapcontext(&running_process->ctx,&sched_ctx);
+	swapcontext(&running_process->ctx, &sched_ctx);
 }
 
 /* Stops execution until the given process ends.
@@ -136,10 +127,18 @@ int mproc_join(int pid)
  */
 void scheduler()
 {
+	/* Prepare the context for the scheduler */
 	getcontext(&sched_ctx);
-	dispatch();
 
-	return;
+	char stack[STACK_SIZE];
+	sched_ctx.uc_stack.ss_sp   = stack;
+	sched_ctx.uc_stack.ss_size = STACK_SIZE;
+	sched_ctx.uc_link = &main_ctx;
+
+	makecontext(&sched_ctx, dispatch, 0);
+
+	/* Change context */
+	swapcontext(&main_ctx, &sched_ctx);
 }
 
 void dispatch()
@@ -161,6 +160,7 @@ void dispatch()
 		setcontext(&running_process->ctx);
 	}
 
-	//No more processes to be scheduled into the processor
-	return;
+	/* No more processes to be scheduled into the processor,
+	   we should go back to the main context */
+	setcontext(&main_ctx);
 }
