@@ -16,13 +16,17 @@ bool qpush(queue_t *q, proc_info_t *proc)
 	struct qnode *node = (struct qnode*) malloc(sizeof(struct qnode));
 	if (node == NULL) return false;
 
-	/* Attach the node to the queue's list */
+	/* Initialize the node itself */
 	node->proc = proc;
-	node->next = q->last;
+	node->next = NULL;
 
-	/* Update the queue's list */
+	/* Attach the node to the queue */
+	if (q->last == NULL) {
+		q->first = node;
+	} else {
+		q->last->next = node;
+	}
 	q->last = node;
-	if (q->first == NULL) q->first = node;
 
 	return true;
 }
