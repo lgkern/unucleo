@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include <ucontext.h>
 
 #include "procinfo.h"
@@ -30,6 +29,7 @@ proc_info_t *running_process;
 
 // Context to which all processes return
 ucontext_t proc_end_ctx;
+char proc_end_stack[STACK_SIZE];
 
 // Context of the scheduler
 ucontext_t sched_ctx;
@@ -56,8 +56,8 @@ int libsisop_init()
 
 	void *stack = malloc(STACK_SIZE);
 	if (stack==NULL) return 1;
-	proc_end_ctx.uc_stack.ss_sp = stack;
-	proc_end_ctx.uc_stack.ss_size = STACK_SIZE;
+	proc_end_ctx.uc_stack.ss_sp = proc_end_stack;
+	proc_end_ctx.uc_stack.ss_size = sizeof(proc_end_stack);
 
 	makecontext(&proc_end_ctx, return_handler, 0);
 
