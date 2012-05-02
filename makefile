@@ -78,7 +78,7 @@ bin/%.test: test-%.o libsisop.a
 bin/test-%.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-$(TESTOBJS): unucleo.h libsisop.a
+$(TESTOBJS): unucleo.h
 
 
 #### TEST RUNNING
