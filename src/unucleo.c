@@ -53,12 +53,8 @@ int libsisop_init()
 
 	//Initializes the context for the end of each process
 	getcontext(&proc_end_ctx);
-
-	void *stack = malloc(STACK_SIZE);
-	if (stack==NULL) return 1;
 	proc_end_ctx.uc_stack.ss_sp = proc_end_stack;
 	proc_end_ctx.uc_stack.ss_size = sizeof(proc_end_stack);
-
 	makecontext(&proc_end_ctx, return_handler, 0);
 
 	return 0;
