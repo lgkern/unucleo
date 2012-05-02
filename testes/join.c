@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 	/* Runs the threads */
 	libsisop_init();
 	mproc_create(1, count, 1);
-	mproc_create(1, end, max);
+	mproc_create(1, end, max+1);
 
 	scheduler();
 

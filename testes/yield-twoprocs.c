@@ -23,8 +23,9 @@ void *printnums(void *first)
 {
 	int i = (int)first;
 	while (i<=max) {
-		printf("%d ", i++);
+		printf("%d ", i);
 		obtained[current++] = i;
+		i += 2;
 		mproc_yield();
 	}
 
